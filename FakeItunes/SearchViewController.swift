@@ -39,25 +39,54 @@ class SearchViewController: UIViewController {
         tableView.register(cellNib, forCellReuseIdentifier: TableView.CellIdentifiers.searchResultCell)
         let cellNFNib = UINib(nibName: TableView.CellIdentifiers.nothingFoundCell, bundle: nil)
         tableView.register(cellNFNib, forCellReuseIdentifier: TableView.CellIdentifiers.nothingFoundCell)
+        
+        searchBar.becomeFirstResponder()
     
     }
+    
+    // MARK: - Helper methods
+    
+    func itunesURL(searchText: String) -> URL {
+        // http vs https (secured)
+        let encodedText = searchText.addingPercentEncoding(withAllowedCharacters: CharacterSet.urlQueryAllowed)
+        
+        let urlString = String(format: "http://itunes.apple.com/search?term=%@", encodedText!)
+        
+        let url = URL(string: urlString)
+        return url!
+    }
+    // Unicode (utf-8) or ASCII
+    
+    func performItunesRequest(with url: URL) -> String? {
+        do {
+            let string = try String(contentsOf: url, encoding: .utf8)
+            return string
+        } catch {
+            print("ERROR: Cannot download - \(error.localizedDescription)")
+            return nil
+        }
+        
+    }
+    
 }
 
 // MARK: = SearchBar Delegate
 extension SearchViewController: UISearchBarDelegate {
     
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+        searchBar.resignFirstResponder()
         searchResults = []
         
-        if searchBar.text != "Atai" {
-        searchResults.append(SearchResult(name: "Fake Result 1", artistName: searchBar.text!))
-        searchResults.append(SearchResult(name: "Fake Result 2", artistName: searchBar.text!))
-        searchResults.append(SearchResult(name: "Fake Result 3", artistName: searchBar.text!))
+        hasSearched = true
+        
+        let url = itunesURL(searchText: searchBar.text!)
+        print("------URL - \(url)-----")
+        
+        if let jsonString = performItunesRequest(with: url) {
+            print(jsonString)
         }
         
-        hasSearched = true
         tableView.reloadData()
-        searchBar.resignFirstResponder()
     }
     
     func position(for bar: UIBarPositioning) -> UIBarPosition {
@@ -115,3 +144,21 @@ extension SearchViewController: UITableViewDelegate, UITableViewDataSource {
 // R - Renamed
 // A - Added
 // Commit
+// EXC_BAD_ACCESS
+// EXC_BREAKPOINT
+
+// CLIENT ----> SERVER
+// CLIENT (App) ----> HTTP request -----> Server (Itunes)    (GET POST)
+// CLIENT (App) <----- Data(JSON, XML) <----- Server
+
+// Client Aslan (WhatsApp) ---X---> Client Bakyt (WhatsApp)
+// Client Aslan (Whatsapp) ---(post)---> Server (Facebook) ----> Client Bakyt (Whatsapp)
+
+// facebook.com (Safari) -> HTML, CSS, JavaScript (site) (Client) ------> Server (GET)
+
+/*
+ JSON - JavaScript Object Notation
+ 
+ { } - Dictionary
+ [ ] - Array
+ */
