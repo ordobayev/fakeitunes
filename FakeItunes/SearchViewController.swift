@@ -57,17 +57,37 @@ class SearchViewController: UIViewController {
     }
     // Unicode (utf-8) or ASCII
     
-    func performItunesRequest(with url: URL) -> String? {
+    func performItunesRequest(with url: URL) -> Data? {
         do {
-            let string = try String(contentsOf: url, encoding: .utf8)
-            return string
+            let data = try Data(contentsOf: url)
+            return data
         } catch {
             print("ERROR: Cannot download - \(error.localizedDescription)")
+            shownNetworkError()
             return nil
         }
         
     }
     
+    // decoding, serialization, parsing -> JSON -> Object
+    func parse(data: Data) -> [SearchResult] {
+        let decoder = JSONDecoder()
+        do {
+            let results = try decoder.decode(SearchResponse.self, from: data)
+            return results.results
+        } catch {
+            print("JSON parsing error \(error.localizedDescription)")
+            return []
+        }
+    }
+    
+    func shownNetworkError() {
+        let alert = UIAlertController(title: "Error", message: "There was an error accessing the Itunes Store. Please try again.", preferredStyle: .alert)
+        
+        let okAction = UIAlertAction(title: "OK", style: .default, handler: nil)
+        alert.addAction(okAction)
+        present(alert, animated: true, completion: nil)
+    }
 }
 
 // MARK: = SearchBar Delegate
@@ -82,8 +102,12 @@ extension SearchViewController: UISearchBarDelegate {
         let url = itunesURL(searchText: searchBar.text!)
         print("------URL - \(url)-----")
         
-        if let jsonString = performItunesRequest(with: url) {
-            print(jsonString)
+        if let data = performItunesRequest(with: url) {
+            searchResults = parse(data: data)
+        }
+        
+        searchResults.sort { (result1, result2) -> Bool in
+            return result1.name.localizedStandardCompare(result2.name) == .orderedAscending
         }
         
         tableView.reloadData()
@@ -118,8 +142,14 @@ extension SearchViewController: UITableViewDelegate, UITableViewDataSource {
         } else {
             let cell = tableView.dequeueReusableCell(withIdentifier: TableView.CellIdentifiers.searchResultCell, for: indexPath) as! SearchResultCell
             
-            cell.nameLabel.text = searchResults[indexPath.row].name
-            cell.artistNameLabel.text = searchResults[indexPath.row].artistName
+            let searchResult = searchResults[indexPath.row]
+            
+            cell.nameLabel.text = searchResult.name
+            if searchResult.artist.isEmpty {
+                cell.artistNameLabel.text = "(\(searchResult.itemType)) Unknown"
+            } else {
+                cell.artistNameLabel.text = "(\(searchResult.itemType)) \(searchResult.artist)"
+            }
             
             return cell
         }
@@ -161,4 +191,7 @@ extension SearchViewController: UITableViewDelegate, UITableViewDataSource {
  
  { } - Dictionary
  [ ] - Array
+ 
+ 
+ 
  */
