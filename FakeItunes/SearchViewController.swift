@@ -11,10 +11,12 @@ class SearchViewController: UIViewController {
     
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var searchBar: UISearchBar!
+    @IBOutlet weak var segmentedControl: UISegmentedControl!
     
     var searchResults = [SearchResult]()
     var hasSearched = false
     var isLoading = false
+    var dataTask: URLSessionDataTask?
     
     struct TableView {
         struct CellIdentifiers {
@@ -35,7 +37,7 @@ class SearchViewController: UIViewController {
         tableView.dataSource = self
         searchBar.delegate = self
         
-        tableView.contentInset = UIEdgeInsets(top: 56, left: 0, bottom: 0, right: 0)
+        tableView.contentInset = UIEdgeInsets(top: 100, left: 0, bottom: 0, right: 0)
         
         let cellNib = UINib(nibName: TableView.CellIdentifiers.searchResultCell, bundle: nil)
         tableView.register(cellNib, forCellReuseIdentifier: TableView.CellIdentifiers.searchResultCell)
@@ -48,30 +50,38 @@ class SearchViewController: UIViewController {
     
     }
     
+    // MARK: - Actions
+    
+    @IBAction func segmentChanged(_ sender: UISegmentedControl) {
+        print("Segment changed: \(sender.selectedSegmentIndex)")
+        performSearch()
+    }
+    
+    
     // MARK: - Helper methods
     
-    func itunesURL(searchText: String) -> URL {
+    func itunesURL(searchText: String, category: Int) -> URL {
+        
+        let kind: String
+        
+        switch category {
+            case 1: kind = "musicTrack"
+            case 2: kind = "software"
+            case 3: kind = "ebook"
+            default: kind = ""
+        }
+        
         // http vs https (secured)
         let encodedText = searchText.addingPercentEncoding(withAllowedCharacters: CharacterSet.urlQueryAllowed)
         
-        let urlString = String(format: "http://itunes.apple.com/search?term=%@&limit=200", encodedText!)
+        let urlString = String(format: "http://itunes.apple.com/search?term=%@&limit=200&entity=\(kind)", encodedText!)
+        
         
         let url = URL(string: urlString)
+        
         return url!
     }
     // Unicode (utf-8) or ASCII
-    
-    func performItunesRequest(with url: URL) -> Data? {
-        do {
-            let data = try Data(contentsOf: url)
-            return data
-        } catch {
-            print("ERROR: Cannot download - \(error.localizedDescription)")
-            shownNetworkError()
-            return nil
-        }
-        
-    }
     
     // decoding, serialization, parsing -> JSON -> Object
     func parse(data: Data) -> [SearchResult] {
@@ -92,6 +102,58 @@ class SearchViewController: UIViewController {
         alert.addAction(okAction)
         present(alert, animated: true, completion: nil)
     }
+    
+    func performSearch() {
+        searchBar.resignFirstResponder() // 0
+        searchResults = [] // 0
+        
+        dataTask?.cancel()
+        
+        isLoading = true // 0
+        tableView.reloadData() // 0
+        
+        hasSearched = true // 0
+        
+        let url = itunesURL(searchText: searchBar.text!, category: segmentedControl.selectedSegmentIndex) // 0
+        print("------URL - \(url)-----")
+        
+        let session = URLSession.shared
+        
+        dataTask = session.dataTask(with: url) { (data, response, error) in
+            
+            print("On main Thread? \(Thread.current.isMainThread ? "YES" : "NO")")
+            
+            if let error = error as NSError?, error.code == -999 {
+                print("ERROR: \(error.localizedDescription) - CANCELED")
+                return
+            } else if let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 {
+                
+                if let data = data {
+                    self.searchResults = self.parse(data: data)
+                    self.searchResults.sort { (result1, result2) -> Bool in
+                        result1.name.localizedStandardCompare(result2.name) == .orderedAscending
+                }
+                    
+                    DispatchQueue.main.async {
+                        self.isLoading = false
+                        self.tableView.reloadData()
+                    }
+                }
+                
+            } else {
+                print("FAILURE: \(response!)")
+                DispatchQueue.main.async {
+                    self.hasSearched = false
+                    self.isLoading = false
+                    self.tableView.reloadData()
+                    self.shownNetworkError()
+                }
+
+            }
+            
+        }
+        dataTask?.resume()
+    }
 }
 
 
@@ -99,36 +161,7 @@ class SearchViewController: UIViewController {
 extension SearchViewController: UISearchBarDelegate {
     
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) { // executes on MAIN thread (queue)
-        
-        searchBar.resignFirstResponder() // 0
-        searchResults = [] // 0
-        
-        isLoading = true // 0
-        tableView.reloadData() // 0
-        
-        hasSearched = true // 0
-        
-        let queue = DispatchQueue.global()
-        
-        let url = itunesURL(searchText: searchBar.text!) // 0
-        print("------URL - \(url)-----")
-        
-        queue.async {
-            if let data = self.performItunesRequest(with: url) { // 0 - 30
-                self.searchResults = self.parse(data: data) // 0 - 2
-                self.searchResults.sort { (result1, result2) -> Bool in // 0 - 1
-                    return result1.name.localizedStandardCompare(result2.name) == .orderedAscending
-                }
-
-                DispatchQueue.main.async {
-                    self.isLoading = false
-                    self.tableView.reloadData()
-      
-                }
-                return
-            }
-        }
-        
+        performSearch()
     }
     
     func position(for bar: UIBarPositioning) -> UIBarPosition {
