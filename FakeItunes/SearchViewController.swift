@@ -205,12 +205,7 @@ extension SearchViewController: UITableViewDelegate, UITableViewDataSource {
             
             let searchResult = searchResults[indexPath.row]
             
-            cell.nameLabel.text = searchResult.name
-            if searchResult.artist.isEmpty {
-                cell.artistNameLabel.text = "(\(searchResult.itemType)) Unknown"
-            } else {
-                cell.artistNameLabel.text = "(\(searchResult.itemType)) \(searchResult.artist)"
-            }
+            cell.configure(for: searchResult)
             
             return cell
         }
@@ -220,6 +215,8 @@ extension SearchViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         print(indexPath)
         tableView.deselectRow(at: indexPath, animated: true)
+        
+        print("Image URL: \(searchResults[indexPath.row].imageSmall)")
     }
     
     func tableView(_ tableView: UITableView, willSelectRowAt indexPath: IndexPath) -> IndexPath? {
