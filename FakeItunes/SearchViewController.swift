@@ -50,6 +50,20 @@ class SearchViewController: UIViewController {
     
     }
     
+    // MARK: Navigation
+    
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        if segue.identifier == "showDetail" {
+            segue.destination.modalPresentationStyle = .pageSheet
+            
+            let destination = segue.destination as! DetailViewController
+            
+            let indexPath = sender as! IndexPath
+            destination.searchResult = searchResults[indexPath.row]
+            
+        }
+    }
+    
     // MARK: - Actions
     
     @IBAction func segmentChanged(_ sender: UISegmentedControl) {
@@ -216,7 +230,7 @@ extension SearchViewController: UITableViewDelegate, UITableViewDataSource {
         print(indexPath)
         tableView.deselectRow(at: indexPath, animated: true)
         
-        print("Image URL: \(searchResults[indexPath.row].imageSmall)")
+        performSegue(withIdentifier: "showDetail", sender: indexPath)
     }
     
     func tableView(_ tableView: UITableView, willSelectRowAt indexPath: IndexPath) -> IndexPath? {

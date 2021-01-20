@@ -15,6 +15,7 @@
 		FC03C7C4256DE80000AD2614 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = FC03C7C2256DE80000AD2614 /* LaunchScreen.storyboard */; };
 		FC03C7CE256E006600AD2614 /* SearchResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC03C7CD256E006600AD2614 /* SearchResult.swift */; };
 		FCA825642589279200E71620 /* UIImageView+DownloadImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCA825632589279200E71620 /* UIImageView+DownloadImage.swift */; };
+		FCA8258A25899ECC00E71620 /* DetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCA8258925899ECC00E71620 /* DetailViewController.swift */; };
 		FCE20BA9257B392100FC748C /* LoadingCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = FCE20BA8257B392100FC748C /* LoadingCell.xib */; };
 		FCE5ADEA25708F8B00DB4495 /* SearchResultCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = FCE5ADE925708F8B00DB4495 /* SearchResultCell.xib */; };
 		FCE5ADED25709BBC00DB4495 /* SearchResultCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCE5ADEC25709BBC00DB4495 /* SearchResultCell.swift */; };
@@ -32,6 +33,7 @@
 		FC03C7C5256DE80000AD2614 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		FC03C7CD256E006600AD2614 /* SearchResult.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchResult.swift; sourceTree = "<group>"; };
 		FCA825632589279200E71620 /* UIImageView+DownloadImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIImageView+DownloadImage.swift"; sourceTree = "<group>"; };
+		FCA8258925899ECC00E71620 /* DetailViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailViewController.swift; sourceTree = "<group>"; };
 		FCE20BA8257B392100FC748C /* LoadingCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = LoadingCell.xib; sourceTree = "<group>"; };
 		FCE5ADE925708F8B00DB4495 /* SearchResultCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = SearchResultCell.xib; sourceTree = "<group>"; };
 		FCE5ADEC25709BBC00DB4495 /* SearchResultCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchResultCell.swift; sourceTree = "<group>"; };
@@ -71,6 +73,7 @@
 				FC03C7B7256DE7FE00AD2614 /* AppDelegate.swift */,
 				FC03C7B9256DE7FE00AD2614 /* SceneDelegate.swift */,
 				FC03C7BB256DE7FE00AD2614 /* SearchViewController.swift */,
+				FCA8258925899ECC00E71620 /* DetailViewController.swift */,
 				FC03C7BD256DE7FE00AD2614 /* Main.storyboard */,
 				FC03C7C0256DE80000AD2614 /* Assets.xcassets */,
 				FC03C7C2256DE80000AD2614 /* LaunchScreen.storyboard */,
@@ -164,6 +167,7 @@
 				FC03C7CE256E006600AD2614 /* SearchResult.swift in Sources */,
 				FC03C7BA256DE7FE00AD2614 /* SceneDelegate.swift in Sources */,
 				FCE5ADED25709BBC00DB4495 /* SearchResultCell.swift in Sources */,
+				FCA8258A25899ECC00E71620 /* DetailViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
